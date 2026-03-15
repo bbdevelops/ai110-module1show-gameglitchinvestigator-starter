@@ -5,13 +5,16 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
     if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
         return 1, 50
+    if difficulty == "Hard":
+        return 1, 100
     return 1, 100
 
-
-def parse_guess(raw: str):
+#FIX: Added low and high parameters to parse_guess so it can reject numbers
+# outside the valid range. Guesses below low or above high now return ok=False
+# with a descriptive error, preventing negatives and out-of-range values from
+# reaching check_guess.
+def parse_guess(raw: str, low: int = 1, high: int = 100):
     if raw is None:
         return False, None, "Enter a guess."
 
@@ -26,6 +29,9 @@ def parse_guess(raw: str):
     except Exception:
         return False, None, "That is not a number."
 
+    if value < low or value > high:
+        return False, None, f"Guess must be between {low} and {high}."
+
     return True, value, None
 
 
@@ -38,13 +44,16 @@ def check_guess(guess, secret):
             return "Too High", "📈 Go HIGHER!"
         else:
             return "Too Low", "📉 Go LOWER!"
+
     except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+        try:
+            if int(guess) == int(secret):
+                return "Win", "🎉 Correct!"
+            if int(guess) > int(secret):
+                return "Too High", "📈 Go HIGHER!"
+            return "Too Low", "📉 Go LOWER!"
+        except (ValueError, TypeError):
+            return "Error", "❌ Could not compare guess to secret."
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -131,11 +140,22 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+#FIX: Reset status, attempts, secret, score, and history on new game.
+#Previously, status was never reset, causing st.stop() to fire after rerun.
+
 if new_game:
-    st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.status = "playing"
+    st.session_state.attempts = 1
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.score = 0
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
+
+#ERROR
+#So st.stop() fires before the guess input ever renders.
+#From the user's perspective, clicking the button appears to do nothing — 
+#the same end-state message stays on screen.
 
 if st.session_state.status != "playing":
     if st.session_state.status == "won":
@@ -147,18 +167,16 @@ if st.session_state.status != "playing":
 if submit:
     st.session_state.attempts += 1
 
-    ok, guess_int, err = parse_guess(raw_guess)
+    ok, guess_int, err = parse_guess(raw_guess, low, high)
 
     if not ok:
         st.session_state.history.append(raw_guess)
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
-
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
+        
+        #FIX: Always pass secret as an integer to avoid type mismatch in check_guess.
+        secret = st.session_state.secret
 
         outcome, message = check_guess(guess_int, secret)
 
