@@ -1,38 +1,45 @@
-# 🎮 Game Glitch Investigator: The Impossible Guesser
+# 🎮 Game Glitch Investigator: The Fixed Guesser
 
-## 🚨 The Situation
+## 🎯 About the Game
 
-You asked an AI to build a simple "Number Guessing Game" using Streamlit.
-It wrote the code, ran away, and now the game is unplayable. 
-
-- You can't win.
-- The hints lie to you.
-- The secret number seems to have commitment issues.
+A number guessing game built with Streamlit. Pick a difficulty, then guess the secret number within the allowed attempts. After each guess you get a hint — higher or lower — and your final score depends on how quickly you find it.
 
 ## 🛠️ Setup
 
 1. Install dependencies: `pip install -r requirements.txt`
-2. Run the broken app: `python -m streamlit run app.py`
+2. Run the app: `python -m streamlit run app.py`
+3. Run the tests: `pytest tests/test_game_logic.py -v`
 
-## 🕵️‍♂️ Your Mission
+## ✅ Bugs Fixed
 
-1. **Play the game.** Open the "Developer Debug Info" tab in the app to see the secret number. Try to win.
-2. **Find the State Bug.** Why does the secret number change every time you click "Submit"? Ask ChatGPT: *"How do I keep a variable from resetting in Streamlit when I click a button?"*
-3. **Fix the Logic.** The hints ("Higher/Lower") are wrong. Fix them.
-4. **Refactor & Test.** - Move the logic into `logic_utils.py`.
-   - Run `pytest` in your terminal.
-   - Keep fixing until all tests pass!
+| # | Bug | Fix |
+|---|-----|-----|
+| 1 | Hints were backwards ("Go Higher" when too high) | Swapped the hint messages in `check_guess` |
+| 2 | New Game button did nothing | Reset all session_state fields and call `st.rerun()`; moved `st.stop()` guard below the reset handler |
+| 3 | Negative / out-of-range numbers were accepted | Added `low` and `high` parameters to `parse_guess` with a range check |
+| 4 | Score was confusing and could go negative | Simplified to win-only scoring: `max(10, 100 - 10*(attempt-1))` |
+| 5 | Difficulty attempt limits were in the wrong order | Fixed map to `Easy: 10, Normal: 7, Hard: 5` |
+| 6 | Submit button required multiple presses | Wrapped input in `st.form` so Enter and click both fire in one rerun |
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- [x] Describe the game's purpose.
+- [x] Detail which bugs you found.
+- [x] Explain what fixes you applied.
 
 ## 📸 Demo
+### Winning guess!
+- ![win screen](screenshots/win_screen.png)
+### Better luck next time.
+- ![losing screen](screenshots/losing_screen.png)
 
-- [ ] [Insert a screenshot of your fixed, winning game here]
+### Example: Warning Message on Difficulty Change (Reset Game State)
+- ![difficulty warning change message](screenshots/difficulty_change.png)
 
 ## 🚀 Stretch Features
+### Challenge 1: Advanced Edge-Case Testing
+- ![pytest results - 100% pass!](screenshots/pytest_pass_screenshot.png)
+### Example: Warning Message on Incorrect Input (Decimal)
+- ![whole numbers only message](screenshots/whole_numbers_only_message.png)
 
-- [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
+

@@ -35,26 +35,25 @@ Mainly I decided it was fixed if I wasn't able to detect it after several attemp
 - Describe at least one test you ran (manual or using pytest) and what it showed you about your code.
 I entered guesses to see what hints it would suggest, and it intitially showed that the code was basically crossed. The point where it should have told you to go higher, it told you to go lower, and vice versa. I also discovered that the scoring system was completely messed up by manually entering numbers, and then saw the code for it had all kinds of wacky/nonsensical scoring rules.
 - Did AI help you design or understand any tests? How?
-Yes. I'm somewhat new at pytest and so it helped set up the tests, explain how to run them and then subsequently explain what they meant.
+Yes. I'm somewhat new at pytest and so it helped set up the new tests. It also helped explain how to run them and then subsequently explain what they meant. The new tests had to do with testing the total score and making sure it's being updated properly throughout the game.
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
 - In your own words, explain why the secret number kept changing in the original app.
-
+During part of the process, on even numbered guesses, it was converting the secret to a string. It would then compare greater/less than alphabetically, which was incorrect, and partly why the logic was broken.
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-
+Everytime you interact with the app/site the code executes from beginning to end, called reruns. The session state acts as a memory that persists throughout reruns. It can be reset. 
 - What change did you make that finally gave the game a stable secret number?
-
+Removed the section that was changing the data type to a string. Part of the fix that was made was to do simple ==, >, and < checks in the logic_utils.py file. After that the core logic was working better though there were still many things to fix.
 ---
 
 ## 5. Looking ahead: your developer habits
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
-
 - This could be a testing habit, a prompting strategy, or a way you used Git.
-
+I'd like to strengthen my fundamentals using GitHub and pytest. The process of methodically pointing out bugs/areas for improvement, using plan mode, reviewing the plan, activating, testing afterward and making sure to commit when progress has been made is a useful loop.
 - What is one thing you would do differently next time you work with AI on a coding task?
-
+Work on the README file while making changes. Also make a detailed log of updates/changes beyond the commit messages. 
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
-
+AI is capable of making useful changes and debugging if guided. The code it generated in regard to this project was sufficient, though I'm sure there are many improvements that could be made still. If anything, the capability of the AI and the code it output were limited by my lack of expertise. A strong developer vocabulary, coding experience, and DSA knowledge all increase the force that the AI multiplies.  

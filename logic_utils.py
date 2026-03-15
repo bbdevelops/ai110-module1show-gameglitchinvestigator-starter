@@ -21,11 +21,11 @@ def parse_guess(raw: str, low: int = 1, high: int = 100):
     if raw == "":
         return False, None, "Enter a guess."
 
+    if "." in raw:
+        return False, None, "Enter a whole number, not a decimal."
+
     try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
+        value = int(raw)
     except Exception:
         return False, None, "That is not a number."
 
