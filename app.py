@@ -1,77 +1,12 @@
 import random
 import streamlit as st
 
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 50
-    if difficulty == "Hard":
-        return 1, 100
-    return 1, 100
-
-#FIX: Added low and high parameters to parse_guess so it can reject numbers
-# outside the valid range. Guesses below low or above high now return ok=False
-# with a descriptive error, preventing negatives and out-of-range values from
-# reaching check_guess.
-def parse_guess(raw: str, low: int = 1, high: int = 100):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    if value < low or value > high:
-        return False, None, f"Guess must be between {low} and {high}."
-
-    return True, value, None
-
-
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
-        else:
-            return "Too Low", "📉 Go LOWER!"
-
-    except TypeError:
-        try:
-            if int(guess) == int(secret):
-                return "Win", "🎉 Correct!"
-            if int(guess) > int(secret):
-                return "Too High", "📈 Go HIGHER!"
-            return "Too Low", "📉 Go LOWER!"
-        except (ValueError, TypeError):
-            return "Error", "❌ Could not compare guess to secret."
-
-
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+from logic_utils import (
+    get_range_for_difficulty,
+    parse_guess,
+    check_guess,
+    update_score,
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -86,9 +21,10 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
+#FIX: Corrected attempt limits so Easy > Normal > Hard (more attempts = easier).
 attempt_limit_map = {
-    "Easy": 6,
-    "Normal": 8,
+    "Easy": 10,
+    "Normal": 7,
     "Hard": 5,
 }
 attempt_limit = attempt_limit_map[difficulty]
@@ -116,8 +52,8 @@ if "history" not in st.session_state:
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts + 1}"
 )
 
 with st.expander("Developer Debug Info"):
@@ -152,10 +88,8 @@ if new_game:
     st.success("New game started.")
     st.rerun()
 
-#ERROR
-#So st.stop() fires before the guess input ever renders.
-#From the user's perspective, clicking the button appears to do nothing — 
-#the same end-state message stays on screen.
+#FIX: st.stop() guard is placed after new_game handling so the reset runs
+#before the guard can fire, and the game-over message only shows when appropriate.
 
 if st.session_state.status != "playing":
     if st.session_state.status == "won":
@@ -165,8 +99,6 @@ if st.session_state.status != "playing":
     st.stop()
 
 if submit:
-    st.session_state.attempts += 1
-
     ok, guess_int, err = parse_guess(raw_guess, low, high)
 
     if not ok:
@@ -174,20 +106,21 @@ if submit:
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
-        
-        #FIX: Always pass secret as an integer to avoid type mismatch in check_guess.
-        secret = st.session_state.secret
 
-        outcome, message = check_guess(guess_int, secret)
+        outcome, message = check_guess(guess_int, st.session_state.secret)
 
         if show_hint:
             st.warning(message)
 
+        #FIX: Pass attempt_number before incrementing so attempt 1 maps to
+        #index 1 (not 2), fixing the off-by-one in the win score formula.
         st.session_state.score = update_score(
             current_score=st.session_state.score,
             outcome=outcome,
             attempt_number=st.session_state.attempts,
         )
+
+        st.session_state.attempts += 1
 
         if outcome == "Win":
             st.balloons()
@@ -197,7 +130,7 @@ if submit:
                 f"Final score: {st.session_state.score}"
             )
         else:
-            if st.session_state.attempts >= attempt_limit:
+            if st.session_state.attempts > attempt_limit:
                 st.session_state.status = "lost"
                 st.error(
                     f"Out of attempts! "
