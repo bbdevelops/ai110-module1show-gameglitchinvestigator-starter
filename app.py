@@ -83,6 +83,9 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if "high_score" not in st.session_state:
+    st.session_state.high_score = 0
+
 st.subheader("Make a guess")
 
 st.info(
@@ -125,12 +128,13 @@ if submit:
     ok, guess_int, err = parse_guess(raw_guess, low, high)
 
     if not ok:
-        st.session_state.history.append(raw_guess)
+        st.session_state.history.append({"guess": raw_guess, "outcome": "Invalid"})
         st.error(err)
     else:
-        st.session_state.history.append(guess_int)
-
+        assert guess_int is not None
         outcome, message = check_guess(guess_int, st.session_state.secret)
+
+        st.session_state.history.append({"guess": guess_int, "outcome": outcome})
 
         if show_hint:
             st.warning(message)
@@ -140,6 +144,9 @@ if submit:
             outcome=outcome,
             attempt_number=st.session_state.attempts,
         )
+
+        if st.session_state.score > st.session_state.high_score:
+            st.session_state.high_score = st.session_state.score
 
         st.session_state.attempts += 1
 
@@ -158,6 +165,31 @@ if submit:
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
                 )
+
+# Stretch 2 (Agent Mode): Sidebar panels are placed here, AFTER the submit
+# logic, so session_state.history and high_score already reflect the current
+# guess when the sidebar renders — eliminating the one-guess display lag.
+st.sidebar.divider()
+st.sidebar.subheader("Session High Score")
+st.sidebar.metric("Best Score", st.session_state.get("high_score", 0))
+
+st.sidebar.divider()
+st.sidebar.subheader("Guess History")
+history = st.session_state.get("history", [])
+if not history:
+    st.sidebar.caption("No guesses yet.")
+else:
+    for entry in reversed(history):
+        guess_val = entry["guess"]
+        outcome = entry["outcome"]
+        if outcome == "Invalid":
+            st.sidebar.caption(f"? {guess_val} — invalid input")
+        elif outcome == "Win":
+            st.sidebar.caption(f"✅ {guess_val} — correct!")
+        elif outcome == "Too High":
+            st.sidebar.caption(f"⬇️ {guess_val} — too high")
+        elif outcome == "Too Low":
+            st.sidebar.caption(f"⬆️ {guess_val} — too low")
 
 # ── Debug panel placed here so it renders AFTER the submit logic updates
 # session_state, meaning it always reflects the current guess's result.

@@ -2,7 +2,7 @@
 
 ## 🎯 About the Game
 
-A number guessing game built with Streamlit. Pick a difficulty, then guess the secret number within the allowed attempts. After each guess you get a hint — higher or lower — and your final score depends on how quickly you find it.
+A number guessing game built with Streamlit. Pick a difficulty, then guess the secret number within the allowed attempts. After each guess you get a hint — higher or lower — and your final score depends on how quickly you find it. Fixed in conjunction with Claude.
 
 ## 🛠️ Setup
 
@@ -33,13 +33,25 @@ A number guessing game built with Streamlit. Pick a difficulty, then guess the s
 ### Better luck next time.
 - ![losing screen](screenshots/losing_screen.png)
 
-### Example: Warning Message on Difficulty Change (Reset Game State)
-- ![difficulty warning change message](screenshots/difficulty_change.png)
-
 ## 🚀 Stretch Features
 ### Challenge 1: Advanced Edge-Case Testing
 - ![pytest results - 100% pass!](screenshots/pytest_pass_screenshot.png)
 ### Example: Warning Message on Incorrect Input (Decimal)
 - ![whole numbers only message](screenshots/whole_numbers_only_message.png)
+### Example: Warning Message on Difficulty Change (Reset Game State)
+- ![difficulty warning change message](screenshots/difficulty_change.png)
 
+### Challenge 2: Feature Expansion — Guess History Sidebar + Session High Score
+- ![guess history and high score tracker](screenshots/streamlit-app-2026-03-15-02-30-32.gif)
+- **Guess History** panel in the sidebar shows every guess and its outcome (most recent first) with directional icons.
+- **Session High Score** metric tracks the best score across all games in the current browser session — it survives "New Game" resets.
+- Agent Mode was used: Claude coordinated changes across four separate locations in `app.py` in one pass (new `high_score` state key, history dict format, post-win high-score update, and sidebar UI) without breaking the existing debug expander or reset logic.
+
+### Challenge 3: Professional Documentation and Style
+- All functions in `logic_utils.py` now have Google-style docstrings with `Args:`, `Returns:`, and `Examples:` sections, generated with Claude Code's AI documentation action.
+- Return-type annotations added to all functions; `except Exception` narrowed to `except ValueError` for PEP 8 correctness.
+- PEP 8 style review performed with Claude Code (AI Fix/Review action).
+
+### Challenge 4: AI Model Comparison
+- See **Section 6** in `reflection.md` for a comparison of Claude Code vs. ChatGPT (GPT-4o) on Bug 1 (the backwards hint logic), including a table analyzing Pythonicity, explanation clarity, and correctness.
 
