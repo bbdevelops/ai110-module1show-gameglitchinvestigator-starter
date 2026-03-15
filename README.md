@@ -29,20 +29,20 @@ A number guessing game built with Streamlit. Pick a difficulty, then guess the s
 
 ## 📸 Demo
 ### Winning guess!
-- ![win screen](screenshots/win_screen.png)
+![win screen](screenshots/win.gif)
 ### Better luck next time.
-- ![losing screen](screenshots/losing_screen.png)
+![losing screen](screenshots/losing_screen.png)
 
 ## 🚀 Stretch Features
 ### Challenge 1: Advanced Edge-Case Testing
-- ![pytest results - 100% pass!](screenshots/pytest_pass_screenshot.png)
+![pytest results - 100% pass!](screenshots/pytest_pass_screenshot.png)
 ### Example: Warning Message on Incorrect Input (Decimal)
-- ![whole numbers only message](screenshots/whole_numbers_only_message.png)
+![whole numbers only message](screenshots/whole_numbers_only_message.png)
 ### Example: Warning Message on Difficulty Change (Reset Game State)
-- ![difficulty warning change message](screenshots/difficulty_change.png)
+![difficulty warning change message](screenshots/difficulty_change.png)
 
 ### Challenge 2: Feature Expansion — Guess History Sidebar + Session High Score
-- ![guess history and high score tracker](screenshots/streamlit-app-2026-03-15-02-30-32.gif)
+![guess history and high score tracker](screenshots/streamlit-app-2026-03-15-02-30-32.gif)
 - **Guess History** panel in the sidebar shows every guess and its outcome (most recent first) with directional icons.
 - **Session High Score** metric tracks the best score across all games in the current browser session — it survives "New Game" resets.
 - Agent Mode was used: Claude coordinated changes across four separate locations in `app.py` in one pass (new `high_score` state key, history dict format, post-win high-score update, and sidebar UI) without breaking the existing debug expander or reset logic.
